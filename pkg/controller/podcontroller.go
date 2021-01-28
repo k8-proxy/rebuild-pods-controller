@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	"go.uber.org/zap"
 	v1 "k8s.io/api/core/v1"
@@ -12,7 +13,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-var ()
+var deletedPods = make(map[string]string)
 
 type Controller struct {
 	PodNamespace    string
@@ -69,7 +70,7 @@ func NewPodController(logger *zap.Logger, podNamespace string, rs *RebuildSettin
 func (c *Controller) Run(ctx context.Context) {
 
 	c.Logger.Info("Starting the controller")
-	c.createInitialPods()
+	go c.createInitialPods()
 
 	informer := c.InformerFactory.Core().V1().Pods().Informer()
 
@@ -83,12 +84,16 @@ func (c *Controller) Run(ctx context.Context) {
 
 func (c *Controller) createInitialPods() {
 
-	count := c.podCount("status.phase=Running", "manager=podcontroller")
-	count += c.podCount("status.phase=Pending", "manager=podcontroller")
-	c.Logger.Info("Running pods count ", zap.Int("count", count))
+	for {
+		count := c.podCount("status.phase=Running", "manager=podcontroller")
+		count += c.podCount("status.phase=Pending", "manager=podcontroller")
+		c.Logger.Info("Running pods count ", zap.Int("count", count))
 
-	for i := 0; i < c.RebuildSettings.PodCount-count; i++ {
-		c.CreatePod()
+		for i := 0; i < c.RebuildSettings.PodCount-count; i++ {
+			c.CreatePod()
+		}
+
+		time.Sleep(60 * time.Second)
 	}
 
 }
@@ -99,14 +104,24 @@ func (c *Controller) recreatePod(oldObj, newObj interface{}) {
 		c.Logger.Info("We have a pod")
 		c.Logger.Sugar().Warnf("New pod is : %v", newObj)
 
-		// And delete the previous one
-		err := c.deletePod(pod)
-		if err != nil {
-			c.Logger.Error("Failed to delete pod: ", zap.Error(err))
-		} else {
-			// We create a new pod. TODO : This needs to be passed to a worker queue
-			c.CreatePod() // TODO : need a better way of doing this
+		// we do this just in order to run the pod creation/deletion only once. becauase sometimes we receive same event 2 times for a pod. Needs to investigate why
+		_, exist := deletedPods[pod.ObjectMeta.Name]
+		if !exist {
+			deletedPods[pod.ObjectMeta.Name] = "yes"
+			go c.deletePod(pod)
+			c.CreatePod()
 		}
+		// And delete the previous one
+		/*
+			err := c.deletePod(pod)
+			if err != nil {
+				c.Logger.Error("Failed to delete pod: ", zap.Error(err))
+			} else {
+
+				// We create a new pod. TODO : This needs to be passed to a worker queue
+				c.CreatePod() // TODO : need a better way of doing this
+			}
+		*/
 	}
 }
 
@@ -130,6 +145,7 @@ func (c *Controller) isPodUnhealthy(pod *v1.Pod) bool {
 }
 
 func (c *Controller) deletePod(pod *v1.Pod) error {
+	time.Sleep(30 * time.Second)
 	c.Logger.Info("Deleting pod", zap.String("podName", pod.ObjectMeta.Name))
 	return c.Client.CoreV1().Pods(pod.ObjectMeta.Namespace).Delete(pod.ObjectMeta.Name, &metav1.DeleteOptions{})
 }
