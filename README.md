@@ -10,7 +10,7 @@ kubectl  -n icap-adaptation get pods
 ```
 mkdir /tmp/input
 cp <pdf_file_name> /tmp/input/
-docker run --rm -v /tmp/input:/opt/input -v /tmp/output:/opt/output glasswallsolutions/c-icap-client:manual-v1 -s 'gw_rebuild' -i 54.170.58.141 -f '/opt/input/<pdf_file_name>' -o /opt/output/<pdf_file_name> -v
+docker run --rm -v /tmp/input:/opt/input -v /tmp/output:/opt/output glasswallsolutions/c-icap-client:manual-v1 -s 'gw_rebuild' -i <your vm IP> -f '/opt/input/<pdf_file_name>' -o /opt/output/<pdf_file_name> -v
 ```
 During the test review the pods logs (icap-server, adaptation-service, any rebuild pods)
 
