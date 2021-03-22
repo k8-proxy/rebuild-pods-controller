@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/util/runtime"
 
-	podcontroller "github.com/azopat/pod-controller/pkg/controller"
+	podcontroller "github.com/k8-proxy/go-k8s-controller/pkg/controller"
 )
 
 func main() {
