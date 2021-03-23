@@ -23,6 +23,26 @@
 
 # Rebuild pod controller
 
+This service is a controller service making sure we always have a certain number of hot pods running and listening to the queues. Ready to get a file for processing.
+
+### Steps of processing
+When it starts
+- It will start an amount of pods
+- It will monitor their status and in case one of them get completed it triggers a new one
+
+## Configuration
+These environment variables are needed by the service 
+- POD_COUNT : Count of pods to start
+- MINIO_USER : Minio access key
+- MINIO_PASSWORD : Minio access secret
+
+
+### Docker build
+- To build the docker image
+```
+docker build -t <docker_image_name> .
+```
+
 # Testing steps
 
 - Log in to the VM
