@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/util/runtime"
 
-	podcontroller "github.com/azopat/pod-controller/pkg/controller"
+	podcontroller "github.com/k8-proxy/go-k8s-controller/pkg/controller"
 )
 
 func main() {
@@ -23,13 +23,19 @@ func main() {
 	podNamespace := "icap-adaptation"
 
 	podCountStr := os.Getenv("POD_COUNT")
+	minioUser := os.Getenv("MINIO_USER")
+	minioPassword := os.Getenv("MINIO_PASSWORD")
+	processImage := os.Getenv("PROCESS_IMAGE")
 	podCount, err := strconv.Atoi(podCountStr)
 	if err != nil {
 		podCount = 10 // default value
 	}
 
 	rs := &podcontroller.RebuildSettings{
-		PodCount: podCount,
+		PodCount:      podCount,
+		MinioUser:     minioUser,
+		MinioPassword: minioPassword,
+		ProcessImage:  processImage,
 	}
 
 	ctrl, err := podcontroller.NewPodController(logger, podNamespace, rs)
