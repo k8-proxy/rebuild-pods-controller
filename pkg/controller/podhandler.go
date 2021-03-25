@@ -70,28 +70,29 @@ func (c *Controller) GetPodObject() *core.Pod {
 		Spec: core.PodSpec{
 			ImagePullSecrets: []core.LocalObjectReference{{Name: "regcred"}},
 			RestartPolicy:    core.RestartPolicyNever,
-			Volumes: []core.Volume{
-				{
-					Name: "sourcedir",
-					VolumeSource: core.VolumeSource{
-						PersistentVolumeClaim: &core.PersistentVolumeClaimVolumeSource{
-							ClaimName: "glasswallsource-pvc",
+			/*
+				Volumes: []core.Volume{
+					{
+						Name: "sourcedir",
+						VolumeSource: core.VolumeSource{
+							PersistentVolumeClaim: &core.PersistentVolumeClaimVolumeSource{
+								ClaimName: "glasswallsource-pvc",
+							},
 						},
 					},
-				},
-				{
-					Name: "targetdir",
-					VolumeSource: core.VolumeSource{
-						PersistentVolumeClaim: &core.PersistentVolumeClaimVolumeSource{
-							ClaimName: "glasswalltarget-pvc",
+					{
+						Name: "targetdir",
+						VolumeSource: core.VolumeSource{
+							PersistentVolumeClaim: &core.PersistentVolumeClaimVolumeSource{
+								ClaimName: "glasswalltarget-pvc",
+							},
 						},
 					},
-				},
-			},
+				}, */
 			Containers: []core.Container{
 				{
 					Name:            "rebuild",
-					Image:           "azopat/adaptation",
+					Image:           "azopat/icap-request-processing:1.0",
 					ImagePullPolicy: core.PullIfNotPresent,
 					Env: []core.EnvVar{
 						{Name: "AMQP_URL", Value: "amqp://guest:guest@rabbitmq-service:5672/"},
@@ -109,11 +110,16 @@ func (c *Controller) GetPodObject() *core.Pod {
 						{Name: "CPU_REQUEST", Value: "0.25"},
 						{Name: "MEMORY_LIMIT", Value: "10000Mi"},
 						{Name: "MEMORY_REQUEST", Value: "250Mi"},
+						{Name: "MINIO_ENDPOINT", Value: "minio-ss-0-0.minio-hl.minio.svc.cluster.local:9000"},
+						{Name: "MINIO_ACCESS_KEY", Value: c.RebuildSettings.MinioUser},
+						{Name: "MINIO_SECRET_KEY", Value: c.RebuildSettings.MinioPassword},
+						{Name: "MINIO_CLEAN_BUCKET", Value: "clean"},
 					},
-					VolumeMounts: []core.VolumeMount{
-						{Name: "sourcedir", MountPath: "/var/source"},
-						{Name: "targetdir", MountPath: "/var/target"},
-					},
+					/*
+						VolumeMounts: []core.VolumeMount{
+							{Name: "sourcedir", MountPath: "/var/source"},
+							{Name: "targetdir", MountPath: "/var/target"},
+						}, */
 					Resources: core.ResourceRequirements{
 						Limits: core.ResourceList{
 							core.ResourceCPU:    resource.MustParse("1"),

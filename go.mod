@@ -1,6 +1,6 @@
-module github.com/azopat/pod-controller
+module github.com/k8-proxy/go-k8s-controller
 
-go 1.12
+go 1.16
 
 require (
 	github.com/gogo/protobuf v1.3.2 // indirect

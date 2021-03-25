@@ -30,7 +30,9 @@ type PodFilter struct {
 }
 
 type RebuildSettings struct {
-	PodCount int
+	PodCount      int
+	MinioUser     string
+	MinioPassword string
 }
 
 func NewPodController(logger *zap.Logger, podNamespace string, rs *RebuildSettings) (*Controller, error) {
