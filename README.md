@@ -43,7 +43,7 @@ These environment variables are needed by the service
 docker build -t <docker_image_name> .
 ```
 
-- This works only on a kubernetes cluster, deploiement steps available on 
+- This works only on a kubernetes cluster, deploiement steps available on https://github.com/k8-proxy/go-k8s-infra
 
 # Testing steps
 

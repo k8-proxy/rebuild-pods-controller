@@ -92,7 +92,7 @@ func (c *Controller) GetPodObject() *core.Pod {
 			Containers: []core.Container{
 				{
 					Name:            "rebuild",
-					Image:           "azopat/icap-request-processing:1.0",
+					Image:           c.RebuildSettings.ProcessImage,
 					ImagePullPolicy: core.PullIfNotPresent,
 					Env: []core.EnvVar{
 						{Name: "AMQP_URL", Value: "amqp://guest:guest@rabbitmq-service:5672/"},

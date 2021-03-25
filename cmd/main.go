@@ -26,6 +26,7 @@ func main() {
 	podCountStr := os.Getenv("POD_COUNT")
 	minioUser := os.Getenv("MINIO_USER")
 	minioPassword := os.Getenv("MINIO_PASSWORD")
+	processImage := os.Getenv("PROCESS_IMAGE")
 	podCount, err := strconv.Atoi(podCountStr)
 	if err != nil {
 		podCount = 10 // default value
@@ -35,6 +36,7 @@ func main() {
 		PodCount:      podCount,
 		MinioUser:     minioUser,
 		MinioPassword: minioPassword,
+		ProcessImage:  processImage,
 	}
 
 	ctrl, err := podcontroller.NewPodController(logger, podNamespace, rs)
