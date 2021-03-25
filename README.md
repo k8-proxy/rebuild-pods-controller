@@ -59,5 +59,4 @@ kubectl  -n icap-adaptation get pods
 During the test review the pods logs (icap-server, adaptation-service, any rebuild pods)
 
 # Rebuild flow to implement
-
 ![new-rebuild-flow-v2](https://github.com/k8-proxy/go-k8s-infra/raw/main/diagram/go-k8s-infra.png)
