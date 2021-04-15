@@ -34,6 +34,7 @@ type RebuildSettings struct {
 	MinioUser     string
 	MinioPassword string
 	ProcessImage  string
+	MinioEndpoint string
 }
 
 func NewPodController(logger *zap.Logger, podNamespace string, rs *RebuildSettings) (*Controller, error) {

@@ -110,10 +110,10 @@ func (c *Controller) GetPodObject() *core.Pod {
 						{Name: "CPU_REQUEST", Value: "0.25"},
 						{Name: "MEMORY_LIMIT", Value: "10000Mi"},
 						{Name: "MEMORY_REQUEST", Value: "250Mi"},
-						{Name: "MINIO_ENDPOINT", Value: "minio-ss-0-0.minio-hl.minio.svc.cluster.local:9000"},
+						{Name: "MINIO_ENDPOINT", Value: c.RebuildSettings.MinioEndpoint},
 						{Name: "MINIO_ACCESS_KEY", Value: c.RebuildSettings.MinioUser},
 						{Name: "MINIO_SECRET_KEY", Value: c.RebuildSettings.MinioPassword},
-						{Name: "MINIO_CLEAN_BUCKET", Value: "clean"},
+						{Name: "MINIO_CLEAN_BUCKET", Value: "cleanfiles"},
 					},
 					/*
 						VolumeMounts: []core.VolumeMount{
