@@ -1,8 +1,8 @@
 <h1 align="center">go-k8s-controller</h1>
 
 <p align="center">
-    <a href="https://github.com/k8-proxy/go-k8s-controller/actions/workflows/build.yml">
-        <img src="https://github.com/k8-proxy/go-k8s-controller/actions/workflows/build.yml/badge.svg"/>
+    <a href="https://github.com/k8-proxy/go-k8s-controller/actions/workflows/build.yaml">
+        <img src="https://github.com/k8-proxy/go-k8s-controller/actions/workflows/build.yaml/badge.svg"/>
     </a>
     <a href="https://codecov.io/gh/k8-proxy/go-k8s-controller">
         <img src="https://codecov.io/gh/k8-proxy/go-k8s-controller/branch/main/graph/badge.svg"/>
