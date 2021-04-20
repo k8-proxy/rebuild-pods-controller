@@ -3,15 +3,21 @@ package controller
 import (
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/matryer/try"
+	"github.com/subosito/gotenv"
 	core "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	guuid "github.com/google/uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+func init() {
+	gotenv.Load()
+}
 
 func (c *Controller) podCount(selector string, labelSelector string) int {
 	pods, err := c.Client.CoreV1().Pods(c.PodNamespace).List(metav1.ListOptions{
@@ -95,25 +101,25 @@ func (c *Controller) GetPodObject() *core.Pod {
 					Image:           c.RebuildSettings.ProcessImage,
 					ImagePullPolicy: core.PullIfNotPresent,
 					Env: []core.EnvVar{
-						{Name: "AMQP_URL", Value: "amqp://guest:guest@rabbitmq-service:5672/"},
-						{Name: "INPUT_MOUNT", Value: "/var/source"},
-						{Name: "OUTPUT_MOUNT", Value: "/var/target"},
-						{Name: "REQUEST_PROCESSING_IMAGE", Value: "glasswallsolutions/icap-request-processing:develop-77b6369"},
-						{Name: "REQUEST_PROCESSING_TIMEOUT", Value: "00:01:00"},
-						{Name: "ADAPTATION_REQUEST_QUEUE_HOSTNAME", Value: "rabbitmq-service"},
-						{Name: "ADAPTATION_REQUEST_QUEUE_PORT", Value: "5672"},
-						{Name: "ARCHIVE_ADAPTATION_QUEUE_REQUEST_HOSTNAME", Value: "rabbitmq-service"},
-						{Name: "ARCHIVE_ADAPTATION_REQUEST_QUEUE_PORT", Value: "5672"},
-						{Name: "TRANSACTION_EVENT_QUEUE_HOSTNAME", Value: "rabbitmq-service"},
-						{Name: "TRANSACTION_EVENT_QUEUE_PORT", Value: "5672"},
-						{Name: "CPU_LIMIT", Value: "1"},
-						{Name: "CPU_REQUEST", Value: "0.25"},
-						{Name: "MEMORY_LIMIT", Value: "10000Mi"},
-						{Name: "MEMORY_REQUEST", Value: "250Mi"},
+						{Name: "AMQP_URL", Value: os.Getenv("AMQP_URL")},
+						{Name: "INPUT_MOUNT", Value: os.Getenv("INPUT_MOUNT")},
+						{Name: "OUTPUT_MOUNT", Value: os.Getenv("OUTPUT_MOUNT")},
+						{Name: "REQUEST_PROCESSING_IMAGE", Value: os.Getenv("REQUEST_PROCESSING_IMAGE")},
+						{Name: "REQUEST_PROCESSING_TIMEOUT", Value: os.Getenv("REQUEST_PROCESSING_TIMEOUT")},
+						{Name: "ADAPTATION_REQUEST_QUEUE_HOSTNAME", Value: os.Getenv("ADAPTATION_REQUEST_QUEUE_HOSTNAME")},
+						{Name: "ADAPTATION_REQUEST_QUEUE_PORT", Value: os.Getenv("ADAPTATION_REQUEST_QUEUE_PORT")},
+						{Name: "ARCHIVE_ADAPTATION_QUEUE_REQUEST_HOSTNAME", Value: os.Getenv("ARCHIVE_ADAPTATION_QUEUE_REQUEST_HOSTNAME")},
+						{Name: "ARCHIVE_ADAPTATION_REQUEST_QUEUE_PORT", Value: os.Getenv("ARCHIVE_ADAPTATION_REQUEST_QUEUE_PORT")},
+						{Name: "TRANSACTION_EVENT_QUEUE_HOSTNAME", Value: os.Getenv("TRANSACTION_EVENT_QUEUE_HOSTNAME")},
+						{Name: "TRANSACTION_EVENT_QUEUE_PORT", Value: os.Getenv("TRANSACTION_EVENT_QUEUE_PORT")},
+						{Name: "CPU_LIMIT", Value: os.Getenv("CPU_LIMIT")},
+						{Name: "CPU_REQUEST", Value: os.Getenv("CPU_REQUEST")},
+						{Name: "MEMORY_LIMIT", Value: os.Getenv("MEMORY_LIMIT")},
+						{Name: "MEMORY_REQUEST", Value: os.Getenv("MEMORY_REQUEST")},
 						{Name: "MINIO_ENDPOINT", Value: c.RebuildSettings.MinioEndpoint},
 						{Name: "MINIO_ACCESS_KEY", Value: c.RebuildSettings.MinioUser},
 						{Name: "MINIO_SECRET_KEY", Value: c.RebuildSettings.MinioPassword},
-						{Name: "MINIO_CLEAN_BUCKET", Value: "cleanfiles"},
+						{Name: "MINIO_CLEAN_BUCKET", Value: os.Getenv("MINIO_CLEAN_BUCKET")},
 					},
 					/*
 						VolumeMounts: []core.VolumeMount{
