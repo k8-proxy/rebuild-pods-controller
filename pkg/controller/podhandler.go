@@ -68,8 +68,7 @@ func (c *Controller) GetPodObject() *core.Pod {
 			Namespace: c.PodNamespace,
 		},
 		Spec: core.PodSpec{
-			ImagePullSecrets: []core.LocalObjectReference{{Name: "regcred"}},
-			RestartPolicy:    core.RestartPolicyNever,
+			RestartPolicy: core.RestartPolicyNever,
 			/*
 				Volumes: []core.Volume{
 					{
