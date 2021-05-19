@@ -35,6 +35,9 @@ type RebuildSettings struct {
 	MinioPassword string
 	ProcessImage  string
 	MinioEndpoint string
+	JaegerHost    string
+	JaegerPort    string
+	JaegerOn      string
 }
 
 func NewPodController(logger *zap.Logger, podNamespace string, rs *RebuildSettings) (*Controller, error) {

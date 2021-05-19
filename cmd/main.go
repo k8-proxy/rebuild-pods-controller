@@ -28,6 +28,10 @@ func main() {
 	processImage := os.Getenv("PROCESS_IMAGE")
 	minioEndpoint := os.Getenv("MINIO_ENDPOINT")
 	podCount, err := strconv.Atoi(podCountStr)
+
+	jaegerHost := os.Getenv("JAEGER_AGENT_HOST")
+	jaegerPort := os.Getenv("JAEGER_AGENT_PORT")
+	jaegerOn := os.Getenv("JAEGER_AGENT_ON")
 	if err != nil {
 		podCount = 10 // default value
 	}
@@ -38,6 +42,9 @@ func main() {
 		MinioPassword: minioPassword,
 		ProcessImage:  processImage,
 		MinioEndpoint: minioEndpoint,
+		JaegerHost:    jaegerHost,
+		JaegerPort:    jaegerPort,
+		JaegerOn:      jaegerOn,
 	}
 
 	ctrl, err := podcontroller.NewPodController(logger, podNamespace, rs)
