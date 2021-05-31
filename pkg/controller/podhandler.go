@@ -113,6 +113,9 @@ func (c *Controller) GetPodObject() *core.Pod {
 						{Name: "MINIO_ACCESS_KEY", Value: c.RebuildSettings.MinioUser},
 						{Name: "MINIO_SECRET_KEY", Value: c.RebuildSettings.MinioPassword},
 						{Name: "MINIO_CLEAN_BUCKET", Value: "cleanfiles"},
+						{Name: "JAEGER_AGENT_HOST", Value: c.RebuildSettings.JaegerHost},
+						{Name: "JAEGER_AGENT_PORT", Value: c.RebuildSettings.JaegerPort},
+						{Name: "JAEGER_AGENT_ON", Value: c.RebuildSettings.JaegerOn},
 					},
 					/*
 						VolumeMounts: []core.VolumeMount{
