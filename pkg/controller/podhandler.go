@@ -124,12 +124,12 @@ func (c *Controller) GetPodObject() *core.Pod {
 						}, */
 					Resources: core.ResourceRequirements{
 						Limits: core.ResourceList{
-							core.ResourceCPU:    resource.MustParse("1"),
-							core.ResourceMemory: resource.MustParse("500Mi"),
+							core.ResourceCPU:    resource.MustParse(c.RebuildSettings.ProcessPodCpuLimit),
+							core.ResourceMemory: resource.MustParse(c.RebuildSettings.ProcessPodMemoryLimit),
 						},
 						Requests: core.ResourceList{
-							core.ResourceCPU:    resource.MustParse("25m"),
-							core.ResourceMemory: resource.MustParse("100Mi"),
+							core.ResourceCPU:    resource.MustParse(c.RebuildSettings.ProcessPodCpuRequest),
+							core.ResourceMemory: resource.MustParse(c.RebuildSettings.ProcessPodMemoryRequest),
 						},
 					},
 				},
