@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"strconv"
+	"strings"
 
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/util/runtime"
@@ -29,6 +30,26 @@ func main() {
 	minioEndpoint := os.Getenv("MINIO_ENDPOINT")
 	podCount, err := strconv.Atoi(podCountStr)
 
+	processPodCpuRequest := os.Getenv("PROCESS_POD_CPU_REQUEST")
+	if strings.TrimSpace(processPodCpuRequest) == "" {
+		processPodCpuRequest = "25m"
+	}
+
+	processPodCpuLimit := os.Getenv("PROCESS_POD_CPU_LIMIT")
+	if strings.TrimSpace(processPodCpuLimit) == "" {
+		processPodCpuLimit = "1"
+	}
+
+	processPodMemoryRequest := os.Getenv("PROCESS_POD_MEMORY_REQUEST")
+	if strings.TrimSpace(processPodMemoryRequest) == "" {
+		processPodMemoryRequest = "200Mi"
+	}
+
+	processPodMemoryLimit := os.Getenv("PROCESS_POD_MEMORY_LIMIT")
+	if strings.TrimSpace(processPodMemoryLimit) == "" {
+		processPodMemoryLimit = "500Mi"
+	}
+
 	jaegerHost := os.Getenv("JAEGER_AGENT_HOST")
 	jaegerPort := os.Getenv("JAEGER_AGENT_PORT")
 	jaegerOn := os.Getenv("JAEGER_AGENT_ON")
@@ -37,14 +58,18 @@ func main() {
 	}
 
 	rs := &podcontroller.RebuildSettings{
-		PodCount:      podCount,
-		MinioUser:     minioUser,
-		MinioPassword: minioPassword,
-		ProcessImage:  processImage,
-		MinioEndpoint: minioEndpoint,
-		JaegerHost:    jaegerHost,
-		JaegerPort:    jaegerPort,
-		JaegerOn:      jaegerOn,
+		PodCount:                podCount,
+		MinioUser:               minioUser,
+		MinioPassword:           minioPassword,
+		ProcessImage:            processImage,
+		MinioEndpoint:           minioEndpoint,
+		JaegerHost:              jaegerHost,
+		JaegerPort:              jaegerPort,
+		JaegerOn:                jaegerOn,
+		ProcessPodCpuRequest:    processPodCpuRequest,
+		ProcessPodCpuLimit:      processPodCpuLimit,
+		ProcessPodMemoryRequest: processPodMemoryRequest,
+		ProcessPodMemoryLimit:   processPodMemoryLimit,
 	}
 
 	ctrl, err := podcontroller.NewPodController(logger, podNamespace, rs)
