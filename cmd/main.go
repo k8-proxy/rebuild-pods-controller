@@ -77,7 +77,8 @@ func main() {
 		logger.Panic("Failed to initialise the controller", zap.Error(err))
 	}
 
-	ctrl.Run(ctx)
+	ctrl.CTX = ctx
+	ctrl.Run()
 
 	<-ctx.Done()
 }

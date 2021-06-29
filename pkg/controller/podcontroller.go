@@ -28,6 +28,7 @@ type Controller struct {
 	InformerFactory informers.SharedInformerFactory
 	Logger          *zap.Logger
 	RebuildSettings *RebuildSettings
+	CTX             context.Context
 }
 
 type PodFilter struct {
@@ -84,7 +85,7 @@ func NewPodController(logger *zap.Logger, podNamespace string, rs *RebuildSettin
 	return controller, nil
 }
 
-func (c *Controller) Run(ctx context.Context) {
+func (c *Controller) Run() {
 
 	c.Logger.Info("Starting the controller")
 	go c.createInitialPods()
@@ -94,9 +95,9 @@ func (c *Controller) Run(ctx context.Context) {
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		UpdateFunc: c.recreatePod,
 	})
-	informer.Run(ctx.Done())
+	informer.Run(c.CTX.Done())
 
-	<-ctx.Done()
+	<-c.CTX.Done()
 }
 
 func (c *Controller) createInitialPods() {
@@ -185,5 +186,5 @@ func (c *Controller) isPodUnhealthy(pod *v1.Pod) bool {
 func (c *Controller) deletePod(pod *v1.Pod) error {
 	time.Sleep(30 * time.Second)
 	c.Logger.Info("Deleting pod", zap.String("podName", pod.ObjectMeta.Name))
-	return c.Client.CoreV1().Pods(pod.ObjectMeta.Namespace).Delete(pod.ObjectMeta.Name, &metav1.DeleteOptions{})
+	return c.Client.CoreV1().Pods(pod.ObjectMeta.Namespace).Delete(c.CTX, pod.ObjectMeta.Name, metav1.DeleteOptions{})
 }
