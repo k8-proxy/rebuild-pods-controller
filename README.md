@@ -35,6 +35,15 @@ These environment variables are needed by the service
 - POD_COUNT : Count of pods to start
 - MINIO_USER : Minio access key
 - MINIO_PASSWORD : Minio access secret
+- PROCESS_IMAGE : Request processing pod image and tag that will be use
+- MINIO_ENDPOINT : Minio endpoint that will be injected to processing pods
+- PROCESS_POD_CPU_REQUEST : Processing pod cpu
+- PROCESS_POD_CPU_LIMIT : Processing pod cpu limit (if it's more than the request it means we can have a burst)
+- PROCESS_POD_MEMORY_REQUEST : Processing pod memory
+- PROCESS_POD_MEMORY_LIMIT : Processing pod memory limit (if it's more than the request it means we can have a burst)
+- JAEGER_AGENT_HOST : Jaeger host
+- JAEGER_AGENT_PORT : Jaeger  port
+- JAEGER_AGENT_ON : If the agent is enabled or disabled
 
 
 ### Docker build

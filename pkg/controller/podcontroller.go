@@ -13,7 +13,13 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-var deletedPods = make(map[string]string)
+var (
+	deletedPods         = make(map[string]string)
+	toUnBurstCheckCount = 0
+	toBurstCheckCount   = 0
+	applyPodCount       = 0
+	burstCount          = 0
+)
 
 type Controller struct {
 	PodNamespace    string
@@ -22,6 +28,7 @@ type Controller struct {
 	InformerFactory informers.SharedInformerFactory
 	Logger          *zap.Logger
 	RebuildSettings *RebuildSettings
+	CTX             context.Context
 }
 
 type PodFilter struct {
@@ -30,14 +37,18 @@ type PodFilter struct {
 }
 
 type RebuildSettings struct {
-	PodCount      int
-	MinioUser     string
-	MinioPassword string
-	ProcessImage  string
-	MinioEndpoint string
-	JaegerHost    string
-	JaegerPort    string
-	JaegerOn      string
+	PodCount                int
+	MinioUser               string
+	MinioPassword           string
+	ProcessImage            string
+	MinioEndpoint           string
+	JaegerHost              string
+	JaegerPort              string
+	JaegerOn                string
+	ProcessPodCpuRequest    string
+	ProcessPodCpuLimit      string
+	ProcessPodMemoryRequest string
+	ProcessPodMemoryLimit   string
 }
 
 func NewPodController(logger *zap.Logger, podNamespace string, rs *RebuildSettings) (*Controller, error) {
@@ -74,7 +85,7 @@ func NewPodController(logger *zap.Logger, podNamespace string, rs *RebuildSettin
 	return controller, nil
 }
 
-func (c *Controller) Run(ctx context.Context) {
+func (c *Controller) Run() {
 
 	c.Logger.Info("Starting the controller")
 	go c.createInitialPods()
@@ -84,20 +95,42 @@ func (c *Controller) Run(ctx context.Context) {
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		UpdateFunc: c.recreatePod,
 	})
-	informer.Run(ctx.Done())
+	informer.Run(c.CTX.Done())
 
-	<-ctx.Done()
+	<-c.CTX.Done()
 }
 
 func (c *Controller) createInitialPods() {
 
-	for {
-		count := c.podCount("status.phase=Running", "manager=podcontroller")
-		count += c.podCount("status.phase=Pending", "manager=podcontroller")
-		c.Logger.Info("Running pods count ", zap.Int("count", count))
+	applyPodCount = c.RebuildSettings.PodCount
 
-		for i := 0; i < c.RebuildSettings.PodCount-count; i++ {
-			c.CreatePod()
+	for {
+		runningPodCount := c.podCount("status.phase=Running", "manager=podcontroller")
+		pendingPodsCount := c.podCount("status.phase=Pending", "manager=podcontroller")
+		totalCount := runningPodCount + pendingPodsCount
+		c.Logger.Info("Running pods count ", zap.Int("count", runningPodCount))
+		c.Logger.Info("Pending pods count ", zap.Int("count", pendingPodsCount))
+
+		// We increase the amount of pods if we have too many pending pods
+		if pendingPodsCount > runningPodCount {
+			toBurstCheckCount++
+			if toBurstCheckCount == 3 {
+				toBurstCheckCount = 0
+				applyPodCount = applyPodCount + 5
+				burstCount++
+			}
+		} else {
+			toBurstCheckCount = 0
+			if burstCount > 0 {
+				burstCount--
+				applyPodCount = applyPodCount - 5
+			}
+		}
+
+		if applyPodCount < 110 && applyPodCount > totalCount {
+			for i := 0; i < applyPodCount-totalCount; i++ {
+				c.CreatePod()
+			}
 		}
 
 		time.Sleep(60 * time.Second)
@@ -124,7 +157,6 @@ func (c *Controller) recreatePod(oldObj, newObj interface{}) {
 			if err != nil {
 				c.Logger.Error("Failed to delete pod: ", zap.Error(err))
 			} else {
-
 				// We create a new pod. TODO : This needs to be passed to a worker queue
 				c.CreatePod() // TODO : need a better way of doing this
 			}
@@ -154,5 +186,5 @@ func (c *Controller) isPodUnhealthy(pod *v1.Pod) bool {
 func (c *Controller) deletePod(pod *v1.Pod) error {
 	time.Sleep(30 * time.Second)
 	c.Logger.Info("Deleting pod", zap.String("podName", pod.ObjectMeta.Name))
-	return c.Client.CoreV1().Pods(pod.ObjectMeta.Namespace).Delete(pod.ObjectMeta.Name, &metav1.DeleteOptions{})
+	return c.Client.CoreV1().Pods(pod.ObjectMeta.Namespace).Delete(c.CTX, pod.ObjectMeta.Name, metav1.DeleteOptions{})
 }

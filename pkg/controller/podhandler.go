@@ -14,7 +14,7 @@ import (
 )
 
 func (c *Controller) podCount(selector string, labelSelector string) int {
-	pods, err := c.Client.CoreV1().Pods(c.PodNamespace).List(metav1.ListOptions{
+	pods, err := c.Client.CoreV1().Pods(c.PodNamespace).List(c.CTX, metav1.ListOptions{
 		LabelSelector: labelSelector,
 		FieldSelector: selector,
 	})
@@ -35,7 +35,7 @@ func (c *Controller) CreatePod() error {
 	err := try.Do(func(attempt int) (bool, error) {
 		var err error
 
-		pod, err = c.Client.CoreV1().Pods(c.PodNamespace).Create(podSpec)
+		pod, err = c.Client.CoreV1().Pods(c.PodNamespace).Create(c.CTX, podSpec, metav1.CreateOptions{})
 
 		if err != nil && attempt < 5 {
 			time.Sleep(5 * time.Second) // 5 second wait
@@ -124,12 +124,12 @@ func (c *Controller) GetPodObject() *core.Pod {
 						}, */
 					Resources: core.ResourceRequirements{
 						Limits: core.ResourceList{
-							core.ResourceCPU:    resource.MustParse("1"),
-							core.ResourceMemory: resource.MustParse("500Mi"),
+							core.ResourceCPU:    resource.MustParse(c.RebuildSettings.ProcessPodCpuLimit),
+							core.ResourceMemory: resource.MustParse(c.RebuildSettings.ProcessPodMemoryLimit),
 						},
 						Requests: core.ResourceList{
-							core.ResourceCPU:    resource.MustParse("25m"),
-							core.ResourceMemory: resource.MustParse("100Mi"),
+							core.ResourceCPU:    resource.MustParse(c.RebuildSettings.ProcessPodCpuRequest),
+							core.ResourceMemory: resource.MustParse(c.RebuildSettings.ProcessPodMemoryRequest),
 						},
 					},
 				},
